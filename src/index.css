@@ -1,0 +1,274 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* ConnectX Pastel Neon Design System - Light Mode */
+    --background: 233 100% 98%;
+    --foreground: 225 53% 15%;
+
+    --card: 0 0% 100% / 0.35;
+    --card-foreground: 225 53% 15%;
+
+    --popover: 0 0% 100% / 0.5;
+    --popover-foreground: 225 53% 15%;
+
+    --primary: 189 100% 72%;
+    --primary-foreground: 225 53% 10%;
+
+    --secondary: 265 100% 80%;
+    --secondary-foreground: 225 53% 10%;
+
+    --muted: 233 50% 92%;
+    --muted-foreground: 225 30% 45%;
+
+    --accent: 311 100% 74%;
+    --accent-foreground: 225 53% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 233 50% 85%;
+    --input: 233 50% 90%;
+    --ring: 189 100% 72%;
+
+    --radius: 1.25rem;
+
+    /* ConnectX Custom Colors */
+    --electric-sky: 189 100% 72%;
+    --pastel-purple: 265 100% 80%;
+    --neon-pink: 311 100% 74%;
+    --mint-glow: 160 100% 75%;
+    --neon-gold: 47 100% 70%;
+    
+    /* Glass Effects */
+    --glass-bg: 0 0% 100% / 0.35;
+    --glass-border: 0 0% 100% / 0.5;
+    --glass-blur: 20px;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(189, 100%, 72%), hsl(265, 100%, 80%), hsl(311, 100%, 74%));
+    --gradient-glow: linear-gradient(135deg, hsl(189, 100%, 72% / 0.5), hsl(265, 100%, 80% / 0.5));
+    
+    /* Shadows */
+    --shadow-neon: 0 0 20px hsl(189, 100%, 72% / 0.3);
+    --shadow-glow: 0 8px 32px hsl(265, 100%, 80% / 0.2);
+    --shadow-card: 0 4px 24px hsl(225, 53% 15% / 0.08);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* ConnectX Pastel Neon Design System - Dark Mode */
+    --background: 225 53% 8%;
+    --foreground: 233 100% 95%;
+
+    --card: 220 50% 12% / 0.5;
+    --card-foreground: 233 100% 95%;
+
+    --popover: 220 50% 10% / 0.7;
+    --popover-foreground: 233 100% 95%;
+
+    --primary: 189 100% 72%;
+    --primary-foreground: 225 53% 8%;
+
+    --secondary: 265 100% 80%;
+    --secondary-foreground: 225 53% 8%;
+
+    --muted: 220 50% 18%;
+    --muted-foreground: 233 50% 70%;
+
+    --accent: 311 100% 74%;
+    --accent-foreground: 225 53% 8%;
+
+    --border: 220 50% 20%;
+    --input: 220 50% 15%;
+    --ring: 189 100% 72%;
+
+    /* Glass Effects - Dark */
+    --glass-bg: 220 50% 15% / 0.35;
+    --glass-border: 0 0% 100% / 0.1;
+    
+    /* Shadows - Dark */
+    --shadow-neon: 0 0 30px hsl(189, 100%, 72% / 0.4);
+    --shadow-glow: 0 8px 32px hsl(265, 100%, 80% / 0.3);
+    --shadow-card: 0 4px 24px hsl(0, 0%, 0% / 0.3);
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Glass Card Effects */
+  .glass-card {
+    @apply backdrop-blur-xl border border-glass-border rounded-[20px];
+    background: hsl(var(--glass-bg));
+    box-shadow: var(--shadow-card);
+  }
+  
+  .glass-card-strong {
+    @apply backdrop-blur-2xl border border-glass-border rounded-[24px];
+    background: hsl(var(--glass-bg));
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Neon Glow Effects */
+  .neon-glow {
+    box-shadow: var(--shadow-neon);
+  }
+  
+  .neon-glow-pink {
+    box-shadow: 0 0 20px hsl(311, 100%, 74% / 0.4);
+  }
+  
+  .neon-glow-purple {
+    box-shadow: 0 0 20px hsl(265, 100%, 80% / 0.4);
+  }
+  
+  .neon-glow-mint {
+    box-shadow: 0 0 20px hsl(160, 100%, 75% / 0.5);
+  }
+  
+  .neon-glow-gold {
+    box-shadow: 0 0 20px hsl(47, 100%, 70% / 0.5);
+  }
+
+  /* Gradient Backgrounds */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(189, 100%, 72%), hsl(265, 100%, 80%), hsl(311, 100%, 74%));
+  }
+  
+  .gradient-primary-soft {
+    background: linear-gradient(135deg, hsl(189, 100%, 72% / 0.3), hsl(265, 100%, 80% / 0.3), hsl(311, 100%, 74% / 0.3));
+  }
+
+  /* Neon Border */
+  .neon-border {
+    position: relative;
+  }
+  
+  .neon-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, hsl(189, 100%, 72%), hsl(265, 100%, 80%), hsl(311, 100%, 74%));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  /* Glowing Underline */
+  .glow-underline {
+    position: relative;
+  }
+  
+  .glow-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, hsl(189, 100%, 72%), hsl(265, 100%, 80%));
+    border-radius: 2px;
+    box-shadow: 0 0 10px hsl(189, 100%, 72% / 0.6);
+  }
+
+  /* Animated Gradient */
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  /* Pulse Glow Animation */
+  @keyframes pulse-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px hsl(160, 100%, 75% / 0.4);
+    }
+    50% { 
+      box-shadow: 0 0 40px hsl(160, 100%, 75% / 0.7);
+    }
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Float Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Shimmer Effect */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, hsl(0, 0%, 100% / 0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, hsl(189, 100%, 72%), hsl(265, 100%, 80%));
+  border-radius: 3px;
+}
+
+/* Mobile Container */
+.mobile-container {
+  @apply max-w-[430px] mx-auto min-h-screen relative overflow-hidden;
+}
