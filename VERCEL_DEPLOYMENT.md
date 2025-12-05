@@ -22,10 +22,10 @@
 Go to **Settings** → **Environment Variables** and add:
 
 ```
-VITE_API_URL=https://connectx-backend.onrender.com/api
+VITE_API_URL=https://connectx-backend-p1n4.onrender.com/api
 ```
 
-**Important**: Replace `connectx-backend.onrender.com` with your actual Render backend URL.
+**Important**: This is the current Render backend URL. If it changes, update this variable.
 
 ### Step 4: Deploy
 
@@ -56,7 +56,7 @@ After Vercel deployment, update your Render backend:
 ## 📝 Environment Variables
 
 ### Required
-- `VITE_API_URL` - Your backend API URL (e.g., `https://connectx-backend.onrender.com/api`)
+- `VITE_API_URL` - Your backend API URL (e.g., `https://connectx-backend-p1n4.onrender.com/api`)
 
 ### Optional
 - None required for basic deployment

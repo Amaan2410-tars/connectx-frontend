@@ -8,12 +8,12 @@
 
 1. **VITE_API_URL Not Set in Vercel**
    - Check Vercel Dashboard → Settings → Environment Variables
-   - Ensure `VITE_API_URL` is set to: `https://connectx-backend.onrender.com/api`
+   - Ensure `VITE_API_URL` is set to: `https://connectx-backend-p1n4.onrender.com/api`
    - **Important**: Must include `/api` at the end
    - Redeploy after adding/updating
 
 2. **Backend Not Accessible**
-   - Test backend health: `https://connectx-backend.onrender.com/`
+   - Test backend health: `https://connectx-backend-p1n4.onrender.com/`
    - Should return: `{"success": true, "status": "ConnectX Backend is Running"}`
    - If not accessible, check Render deployment status
 
@@ -40,7 +40,7 @@
    - See what URL is being called
 
 2. **Check API Call**
-   - Should be: `POST https://connectx-backend.onrender.com/api/auth/login`
+   - Should be: `POST https://connectx-backend-p1n4.onrender.com/api/auth/login`
    - If it's `http://localhost:4000/api/auth/login`, VITE_API_URL is not set
 
 3. **Check Response**
@@ -52,7 +52,7 @@
 **Fix 1: Set VITE_API_URL in Vercel**
 1. Go to Vercel Dashboard
 2. Your Project → Settings → Environment Variables
-3. Add: `VITE_API_URL` = `https://connectx-backend.onrender.com/api`
+3. Add: `VITE_API_URL` = `https://connectx-backend-p1n4.onrender.com/api`
 4. Redeploy
 
 **Fix 2: Update Backend CORS**
@@ -69,12 +69,12 @@
 
 1. **Test Backend Health**
    ```bash
-   curl https://connectx-backend.onrender.com/
+   curl https://connectx-backend-p1n4.onrender.com/
    ```
 
 2. **Test Login Endpoint**
    ```bash
-   curl -X POST https://connectx-backend.onrender.com/api/auth/login \
+   curl -X POST https://connectx-backend-p1n4.onrender.com/api/auth/login \
      -H "Content-Type: application/json" \
      -d '{"email":"test@example.com","password":"password123"}'
    ```
