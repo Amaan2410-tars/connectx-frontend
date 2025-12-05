@@ -27,15 +27,30 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle 401 Unauthorized
+    // Log error for debugging
+    console.error("API Error:", {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+
+    // Handle network errors
+    if (!error.response) {
+      console.error("Network error - Backend may be unreachable");
+      return Promise.reject(new Error("Cannot connect to server. Please check your connection."));
+    }
+
+    // Handle 401 Unauthorized (but not on login/signup pages)
     if (error.response?.status === 401) {
-      // Clear tokens and redirect to login
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
+      const isAuthPage = window.location.pathname === "/login" || window.location.pathname === "/signup";
       
-      // Redirect to login page
-      if (window.location.pathname !== "/login") {
+      if (!isAuthPage) {
+        // Clear tokens and redirect to login
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
         window.location.href = "/login";
       }
     }

@@ -24,7 +24,13 @@ const Login = () => {
       toast.success("Login successful!");
       navigate("/");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Login failed. Please try again.");
+      console.error("Login error:", error);
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        error.message || 
+        "Login failed. Please check your credentials and try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
