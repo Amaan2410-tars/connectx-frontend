@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { Home, Compass, User, Building2, Gift, Shield, Ticket, Moon, Sun, LogOut } from "lucide-react";
+import { Home, Compass, User, Building2, Gift, Shield, Ticket, Moon, Sun, LogOut, Coins, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { HomeFeed } from "../screens/HomeFeed";
-import { DiscoverPage } from "../screens/DiscoverPage";
+import { SearchPage } from "../screens/SearchPage";
 import { ProfilePage } from "../screens/ProfilePage";
 import { CampusHub } from "../screens/CampusHub";
 import { RewardsPage } from "../screens/RewardsPage";
 import { VerificationFlow } from "../screens/VerificationFlow";
 import { CouponsMarketplace } from "../screens/CouponsMarketplace";
+import { CoinsMarketplace } from "../screens/CoinsMarketplace";
+import { PremiumSubscription } from "../screens/PremiumSubscription";
 import { Avatar } from "../ui/Avatar";
 
 const navItems = [
@@ -25,6 +27,8 @@ export const DesktopLayout = () => {
   const [isDark, setIsDark] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [showCoupons, setShowCoupons] = useState(false);
+  const [showCoins, setShowCoins] = useState(false);
+  const [showPremium, setShowPremium] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -45,12 +49,18 @@ export const DesktopLayout = () => {
     if (showCoupons) {
       return <CouponsMarketplace />;
     }
+    if (showCoins) {
+      return <CoinsMarketplace />;
+    }
+    if (showPremium) {
+      return <PremiumSubscription />;
+    }
     
     switch (activeTab) {
       case "home":
         return <HomeFeed />;
       case "discover":
-        return <DiscoverPage />;
+        return <SearchPage />;
       case "campus":
         return <CampusHub />;
       case "rewards":
@@ -88,6 +98,8 @@ export const DesktopLayout = () => {
                     setActiveTab(item.id);
                     setShowVerification(false);
                     setShowCoupons(false);
+                    setShowCoins(false);
+                    setShowPremium(false);
                   }}
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
@@ -107,8 +119,44 @@ export const DesktopLayout = () => {
           <div className="p-4 border-t border-border/50 space-y-2">
             <button
               onClick={() => {
+                setShowCoins(!showCoins);
+                setShowCoupons(false);
+                setShowVerification(false);
+                setShowPremium(false);
+              }}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                showCoins
+                  ? "bg-primary/20 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <Coins className="w-5 h-5" />
+              <span className="font-medium">Coins</span>
+            </button>
+            <button
+              onClick={() => {
+                setShowPremium(!showPremium);
+                setShowCoupons(false);
+                setShowVerification(false);
+                setShowCoins(false);
+              }}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                showPremium
+                  ? "bg-neon-gold/20 text-neon-gold"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <Crown className="w-5 h-5" />
+              <span className="font-medium">Premium</span>
+            </button>
+            <button
+              onClick={() => {
                 setShowCoupons(!showCoupons);
                 setShowVerification(false);
+                setShowCoins(false);
+                setShowPremium(false);
               }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
@@ -124,6 +172,8 @@ export const DesktopLayout = () => {
               onClick={() => {
                 setShowVerification(!showVerification);
                 setShowCoupons(false);
+                setShowCoins(false);
+                setShowPremium(false);
               }}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all",

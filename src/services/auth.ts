@@ -38,6 +38,8 @@ export interface User {
   banner?: string;
   verifiedStatus: "pending" | "approved" | "rejected";
   points: number;
+  coins?: number;
+  isPremium?: boolean;
 }
 
 // POST /auth/signup

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BottomNav } from "../ui/BottomNav";
 import { HomeFeed } from "../screens/HomeFeed";
-import { DiscoverPage } from "../screens/DiscoverPage";
+import { SearchPage } from "../screens/SearchPage";
 import { ProfilePage } from "../screens/ProfilePage";
 import { CampusHub } from "../screens/CampusHub";
 import { RewardsPage } from "../screens/RewardsPage";
@@ -32,7 +32,7 @@ export const MobileApp = () => {
       case "home":
         return <HomeFeed />;
       case "discover":
-        return <DiscoverPage />;
+        return <SearchPage />;
       case "campus":
         return <CampusHub />;
       case "rewards":

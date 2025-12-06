@@ -1,17 +1,22 @@
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Plus, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Plus, Loader2, Megaphone, Edit, Trash2 } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 import { Avatar } from "../ui/Avatar";
 import { VerifiedBadge } from "../ui/VerifiedBadge";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getFeed, likePost, unlikePost, commentOnPost, getPostComments, createPost, type Post } from "@/services/posts";
+import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { getFeed, likePost, unlikePost, commentOnPost, getPostComments, createPost, updatePost, deletePost, updateComment, deleteComment, type Post } from "@/services/posts";
+import { getAnnouncements } from "@/services/announcements";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NeonButton } from "../ui/NeonButton";
+import { FeedSkeleton } from "../ui/skeleton";
+import { sanitizeInput } from "@/utils/sanitize";
+import { compressImage, shouldCompress } from "@/utils/imageCompression";
 
 export const HomeFeed = () => {
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
@@ -19,11 +24,23 @@ export const HomeFeed = () => {
   const [commentDialogOpen, setCommentDialogOpen] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [postDialogOpen, setPostDialogOpen] = useState(false);
+  const [editPostDialogOpen, setEditPostDialogOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [postFormData, setPostFormData] = useState<{ caption: string; image: File | null }>({
     caption: "",
     image: null,
   });
+  const [editPostData, setEditPostData] = useState<{ caption: string; image: File | string | null }>({
+    caption: "",
+    image: null,
+  });
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  const { data: announcementsData } = useQuery({
+    queryKey: ["announcements"],
+    queryFn: getAnnouncements,
+  });
 
   const { data: feedData, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, error } = useInfiniteQuery({
     queryKey: ["feed"],
@@ -70,7 +87,13 @@ export const HomeFeed = () => {
   });
 
   const createPostMutation = useMutation({
-    mutationFn: (data: { caption?: string; image?: File | string }) => createPost(data),
+    mutationFn: (data: { caption?: string; image?: File | string }) => {
+      const sanitizedData = {
+        ...data,
+        caption: data.caption ? sanitizeInput(data.caption) : undefined,
+      };
+      return createPost(sanitizedData);
+    },
     onSuccess: () => {
       setPostFormData({ caption: "", image: null });
       setPostDialogOpen(false);
@@ -79,6 +102,37 @@ export const HomeFeed = () => {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || "Failed to create post");
+    },
+  });
+
+  const updatePostMutation = useMutation({
+    mutationFn: ({ postId, data }: { postId: string; data: { caption?: string; image?: File | string } }) => {
+      const sanitizedData = {
+        ...data,
+        caption: data.caption ? sanitizeInput(data.caption) : undefined,
+      };
+      return updatePost(postId, sanitizedData);
+    },
+    onSuccess: () => {
+      setEditPostData({ caption: "", image: null });
+      setEditPostDialogOpen(false);
+      setEditingPost(null);
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      toast.success("Post updated successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || "Failed to update post");
+    },
+  });
+
+  const deletePostMutation = useMutation({
+    mutationFn: deletePost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      toast.success("Post deleted successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || "Failed to delete post");
     },
   });
 
@@ -98,7 +152,41 @@ export const HomeFeed = () => {
 
   const handleComment = (postId: string) => {
     if (commentText.trim()) {
-      commentMutation.mutate({ postId, text: commentText });
+      const sanitizedText = sanitizeInput(commentText);
+      commentMutation.mutate({ postId, text: sanitizedText });
+    }
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file");
+        return;
+      }
+
+      // Validate file size (max 5MB before compression)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+
+      // Compress if needed
+      let finalFile = file;
+      if (shouldCompress(file, 2)) {
+        try {
+          toast.info("Compressing image...");
+          finalFile = await compressImage(file, { maxSizeMB: 2 });
+          toast.success(`Image compressed from ${(file.size / 1024 / 1024).toFixed(2)}MB to ${(finalFile.size / 1024 / 1024).toFixed(2)}MB`);
+        } catch (error) {
+          console.error("Compression failed:", error);
+          toast.error("Failed to compress image, using original");
+        }
+      }
+
+      setPostFormData({ ...postFormData, image: finalFile });
     }
   };
 
@@ -110,11 +198,8 @@ export const HomeFeed = () => {
 
   if (isLoading) {
     return (
-      <div className="px-4 pt-4 pb-32 space-y-4">
-        <div className="text-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Loading feed...</p>
-        </div>
+      <div className="px-4 lg:px-0 pt-4 lg:pt-6 pb-32 lg:pb-6 space-y-4 lg:space-y-6 animate-fade-in">
+        <FeedSkeleton />
       </div>
     );
   }
@@ -122,12 +207,18 @@ export const HomeFeed = () => {
   if (error) {
     return (
       <div className="px-4 pt-4 pb-32 space-y-4">
-        <div className="text-center py-12">
-          <p className="text-destructive mb-4">Failed to load feed. Please try again.</p>
-          <NeonButton onClick={() => queryClient.invalidateQueries({ queryKey: ["feed"] })}>
+        <GlassCard className="p-6 text-center space-y-4">
+          <p className="text-destructive font-semibold">Failed to load feed</p>
+          <p className="text-muted-foreground text-sm">
+            {error instanceof Error ? error.message : "An error occurred while loading the feed"}
+          </p>
+          <NeonButton
+            variant="gradient"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ["feed"] })}
+          >
             Retry
           </NeonButton>
-        </div>
+        </GlassCard>
       </div>
     );
   }
@@ -153,6 +244,28 @@ export const HomeFeed = () => {
           <p className="text-sm text-muted-foreground">Your Campus Feed</p>
         </div>
       </div>
+
+      {/* Announcements */}
+      {announcementsData?.data && announcementsData.data.length > 0 && (
+        <div className="space-y-3 max-w-3xl lg:mx-auto">
+          {announcementsData.data.map((announcement: any) => (
+            <GlassCard key={announcement.id} className="p-4 border-l-4 border-primary" glow="primary">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-primary/20">
+                  <Megaphone className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground mb-1">{announcement.title}</h3>
+                  <p className="text-sm text-muted-foreground">{announcement.message}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {new Date(announcement.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      )}
 
       {/* Posts */}
       <div className="space-y-4 lg:space-y-6 max-w-3xl lg:mx-auto">
@@ -190,9 +303,37 @@ export const HomeFeed = () => {
                         </div>
                       </div>
                     </div>
-                    <button className="p-2 hover:bg-muted rounded-full transition-colors">
-                      <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
-                    </button>
+                    <div className="relative">
+                      <button className="p-2 hover:bg-muted rounded-full transition-colors">
+                        <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
+                      </button>
+                      {user?.id === post.userId && (
+                        <div className="absolute right-0 top-full mt-2 bg-background border border-border rounded-lg shadow-lg z-10 min-w-[120px]">
+                          <button
+                            onClick={() => {
+                              setEditingPost(post);
+                              setEditPostData({ caption: post.caption || "", image: post.image || null });
+                              setEditPostDialogOpen(true);
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-muted flex items-center gap-2 text-sm"
+                          >
+                            <Edit className="w-4 h-4" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm("Are you sure you want to delete this post?")) {
+                                deletePostMutation.mutate(post.id);
+                              }
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-muted flex items-center gap-2 text-sm text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Post Content */}
@@ -342,18 +483,18 @@ export const HomeFeed = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="post-image">Image (Optional)</Label>
+              <Label htmlFor="post-image">Image (Optional, max 5MB)</Label>
               <Input
                 id="post-image"
                 type="file"
                 accept="image/*"
-                onChange={(e) =>
-                  setPostFormData({
-                    ...postFormData,
-                    image: e.target.files?.[0] || null,
-                  })
-                }
+                onChange={handleImageSelect}
               />
+              {postFormData.image && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {postFormData.image.name} ({(postFormData.image.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
             </div>
             <NeonButton
               variant="gradient"
@@ -368,6 +509,75 @@ export const HomeFeed = () => {
                 </>
               ) : (
                 "Create Post"
+              )}
+            </NeonButton>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Post Dialog */}
+      <Dialog open={editPostDialogOpen} onOpenChange={setEditPostDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Post</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-post-caption">Caption</Label>
+              <Textarea
+                id="edit-post-caption"
+                placeholder="What's on your mind?"
+                value={editPostData.caption}
+                onChange={(e) =>
+                  setEditPostData({ ...editPostData, caption: e.target.value })
+                }
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-post-image">Image (Optional, max 5MB)</Label>
+              <Input
+                id="edit-post-image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const maxSize = 5 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                      toast.error("Image size must be less than 5MB");
+                      return;
+                    }
+                    setEditPostData({ ...editPostData, image: file });
+                  }
+                }}
+              />
+              {editPostData.image && typeof editPostData.image === "string" && (
+                <p className="text-xs text-muted-foreground">Current image: {editPostData.image}</p>
+              )}
+              {editPostData.image && editPostData.image instanceof File && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {editPostData.image.name} ({(editPostData.image.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
+            <NeonButton
+              variant="gradient"
+              className="w-full"
+              onClick={() => {
+                if (editingPost) {
+                  updatePostMutation.mutate({ postId: editingPost.id, data: editPostData });
+                }
+              }}
+              disabled={updatePostMutation.isPending || (!editPostData.caption && !editPostData.image)}
+            >
+              {updatePostMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update Post"
               )}
             </NeonButton>
           </div>

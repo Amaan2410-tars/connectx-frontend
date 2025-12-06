@@ -11,6 +11,12 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import CollegeAdmin from "./pages/CollegeAdmin";
 import SuperAdmin from "./pages/SuperAdmin";
+import { VerificationFlow } from "./components/screens/VerificationFlow";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Shipping from "./pages/Shipping";
+import Contact from "./pages/Contact";
+import Refunds from "./pages/Refunds";
 
 const queryClient = new QueryClient();
 
@@ -33,12 +39,27 @@ const AppRoutes = () => {
         element={isAuthenticated ? <Navigate to="/" replace /> : <Signup />} 
       />
       
+      {/* Public legal pages */}
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/shipping" element={<Shipping />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/refunds" element={<Refunds />} />
+      
       {/* Protected routes - Student */}
       <Route
         path="/"
         element={
           <ProtectedRoute allowedRoles={["student"]}>
             <Index />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/verify"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <VerificationFlow />
           </ProtectedRoute>
         }
       />

@@ -3,21 +3,9 @@ import { api } from "@/lib/apiClient";
 export interface UpdateUserData {
   name?: string;
   batch?: string;
-  avatar?: string;
-  banner?: string;
+  avatar?: File | string;
+  banner?: File | string;
 }
-
-// GET /users/:id
-export const getUserById = async (id: string) => {
-  const response = await api.get(`/users/${id}`);
-  return response.data;
-};
-
-// PUT /users/update
-export const updateUser = async (data: UpdateUserData) => {
-  const response = await api.put("/users/update", data);
-  return response.data;
-};
 
 // Note: Using student profile endpoints
 export const getProfile = async () => {
@@ -29,11 +17,21 @@ export const updateProfile = async (data: UpdateUserData) => {
   const formData = new FormData();
   if (data.name) formData.append("name", data.name);
   if (data.batch) formData.append("batch", data.batch);
-  if (data.avatar && typeof data.avatar === "string") {
+  
+  // Handle avatar - send File if it's a File, otherwise skip (backend will use existing)
+  if (data.avatar instanceof File) {
     formData.append("avatar", data.avatar);
+  } else if (data.avatar && typeof data.avatar === "string") {
+    // If it's a string URL, backend should handle it, but we can skip for now
+    // Backend expects file upload or will use existing
   }
-  if (data.banner && typeof data.banner === "string") {
+  
+  // Handle banner - send File if it's a File, otherwise skip
+  if (data.banner instanceof File) {
     formData.append("banner", data.banner);
+  } else if (data.banner && typeof data.banner === "string") {
+    // If it's a string URL, backend should handle it, but we can skip for now
+    // Backend expects file upload or will use existing
   }
   
   const response = await api.put("/student/profile", formData, {

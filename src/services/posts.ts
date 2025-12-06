@@ -104,14 +104,53 @@ export const commentOnPost = async (postId: string, text: string) => {
 };
 
 // GET /posts/:id/comments
-export const getPostComments = async (postId: string, limit: number = 20) => {
-  const response = await api.get(`/student/posts/${postId}/comments?limit=${limit}`);
+export const getPostComments = async (postId: string, limit: number = 20, cursor?: string) => {
+  const params = new URLSearchParams();
+  params.append("limit", limit.toString());
+  if (cursor) params.append("cursor", cursor);
+  const response = await api.get(`/student/posts/${postId}/comments?${params.toString()}`);
   return response.data;
 };
 
 // Unlike post
 export const unlikePost = async (postId: string) => {
   const response = await api.delete(`/student/posts/${postId}/like`);
+  return response.data;
+};
+
+// PUT /posts/:id - Update post
+export const updatePost = async (postId: string, data: { caption?: string; image?: File | string }) => {
+  const formData = new FormData();
+  if (data.caption) formData.append("caption", data.caption);
+  if (data.image instanceof File) {
+    formData.append("postImage", data.image);
+  } else if (data.image) {
+    formData.append("image", data.image);
+  }
+  
+  const response = await api.put(`/student/posts/${postId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// DELETE /posts/:id - Delete post
+export const deletePost = async (postId: string) => {
+  const response = await api.delete(`/student/posts/${postId}`);
+  return response.data;
+};
+
+// PUT /comments/:id - Update comment
+export const updateComment = async (commentId: string, text: string) => {
+  const response = await api.put(`/student/comments/${commentId}`, { text });
+  return response.data;
+};
+
+// DELETE /comments/:id - Delete comment
+export const deleteComment = async (commentId: string) => {
+  const response = await api.delete(`/student/comments/${commentId}`);
   return response.data;
 };
 

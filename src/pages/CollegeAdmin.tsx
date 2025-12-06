@@ -1,7 +1,7 @@
-import { AdminVerificationPanel } from "@/components/screens/AdminVerificationPanel";
+import { CollegeAdminDashboard } from "@/components/screens/CollegeAdminDashboard";
 
 const CollegeAdmin = () => {
-  return <AdminVerificationPanel />;
+  return <CollegeAdminDashboard />;
 };
 
 export default CollegeAdmin;

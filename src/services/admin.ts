@@ -122,3 +122,24 @@ export const bypassVerification = async (userId: string) => {
   return response.data;
 };
 
+// GET /admin/users
+export const getAllUsers = async (limit: number = 50, cursor?: string): Promise<{ success: boolean; data: { users: any[]; nextCursor?: string; hasMore: boolean } }> => {
+  try {
+    const params = new URLSearchParams();
+    params.append("limit", limit.toString());
+    if (cursor) params.append("cursor", cursor);
+    
+    const response = await api.get(`/admin/users?${params.toString()}`);
+    return {
+      success: response.data?.success !== false,
+      data: response.data?.data || { users: [], hasMore: false },
+    };
+  } catch (error: any) {
+    console.error("Error fetching users:", error);
+    return {
+      success: false,
+      data: { users: [], hasMore: false },
+    };
+  }
+};
+

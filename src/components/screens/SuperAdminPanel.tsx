@@ -13,6 +13,7 @@ import {
   getAdminAnalytics,
   deleteUser,
   deletePost,
+  getAllUsers as getAllUsersService,
 } from "@/services/admin";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
@@ -68,8 +69,15 @@ export const SuperAdminPanel = () => {
     enabled: activeTab === "colleges",
   });
 
+  const { data: usersData, isLoading: usersLoading } = useQuery({
+    queryKey: ["all-users"],
+    queryFn: () => getAllUsersService(50),
+    enabled: activeTab === "users",
+  });
+
   const verifications = verificationsData?.data || [];
   const colleges = collegesData?.data || [];
+  const users = usersData?.data?.users || [];
   const analytics = analyticsData?.data;
 
   const approveMutation = useMutation({
@@ -102,6 +110,17 @@ export const SuperAdminPanel = () => {
       toast.success("College created successfully");
       queryClient.invalidateQueries({ queryKey: ["all-colleges"] });
       setCreateCollegeOpen(false);
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      toast.success("User deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["all-users"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || "Failed to delete user");
     },
   });
 
@@ -172,6 +191,14 @@ export const SuperAdminPanel = () => {
           >
             <Building2 className="w-4 h-4 mr-2" />
             Colleges ({colleges.length})
+          </NeonButton>
+          <NeonButton
+            variant={activeTab === "users" ? "gradient" : "ghost"}
+            onClick={() => setActiveTab("users")}
+            className="whitespace-nowrap"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Users ({users.length})
           </NeonButton>
         </div>
       </div>
@@ -460,6 +487,69 @@ export const SuperAdminPanel = () => {
               </div>
             </GlassCard>
           ))}
+        </div>
+      )}
+
+      {/* Users Tab */}
+      {activeTab === "users" && (
+        <div className="space-y-4">
+          {usersLoading ? (
+            <GlassCard className="text-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-muted-foreground">Loading users...</p>
+            </GlassCard>
+          ) : users.length === 0 ? (
+            <GlassCard className="text-center py-12">
+              <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-lg font-semibold text-foreground">No users found</p>
+            </GlassCard>
+          ) : (
+            <div className="space-y-3">
+              {users.map((user: any) => (
+                <GlassCard key={user.id} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-foreground">{user.name}</h3>
+                          <span className={cn(
+                            "text-xs px-2 py-1 rounded-full",
+                            user.role === "super_admin" ? "bg-primary/20 text-primary" :
+                            user.role === "college_admin" ? "bg-accent/20 text-accent" :
+                            "bg-muted text-muted-foreground"
+                          )}>
+                            {user.role}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">{user.college?.name || "No college"}</p>
+                        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                          <span>{user._count?.posts || 0} posts</span>
+                          <span>{user._count?.eventsRSVP || 0} events</span>
+                          <span>{user._count?.clubs || 0} clubs</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <NeonButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete user ${user.name}?`)) {
+                            deleteUserMutation.mutate(user.id);
+                          }
+                        }}
+                        disabled={deleteUserMutation.isPending}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </NeonButton>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

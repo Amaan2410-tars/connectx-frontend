@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,8 +9,32 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { isAuthenticated, user, loading } = useAuth();
+  const [timeoutReached, setTimeoutReached] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      const timeout = setTimeout(() => {
+        setTimeoutReached(true);
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [loading]);
 
   if (loading) {
+    if (timeoutReached) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+          <p className="text-muted-foreground">Loading is taking longer than expected.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 

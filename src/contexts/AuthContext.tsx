@@ -31,10 +31,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadUser = async () => {
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      console.error("Auth check timeout - clearing tokens");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      setUser(null);
+    }, 10000); // 10 second timeout
+
     try {
       const response = await getMe();
+      clearTimeout(timeoutId);
       setUser(response.data);
     } catch (error) {
+      clearTimeout(timeoutId);
       // Token might be invalid, clear it
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");

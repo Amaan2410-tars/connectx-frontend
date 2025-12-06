@@ -1,4 +1,4 @@
-import { Building2, Users, Calendar, BookOpen, Award, MapPin } from "lucide-react";
+import { Building2, Users, Calendar, BookOpen, Award, MapPin, Crown } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 import { Chip } from "../ui/Chip";
 import { Avatar } from "../ui/Avatar";
@@ -8,6 +8,7 @@ import { getEvents, rsvpEvent } from "@/services/events";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { NeonButton } from "../ui/NeonButton";
+import { cn } from "@/lib/utils";
 
 export const CampusHub = () => {
   const { user } = useAuth();
@@ -136,7 +137,12 @@ export const CampusHub = () => {
                   <Building2 className="w-8 h-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">{club.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-foreground">{club.name}</h3>
+                    {club.isPremiumOnly && (
+                      <Crown className="w-4 h-4 text-neon-gold" title="Premium Only" />
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">{club.description || "No description"}</p>
                   <div className="flex items-center gap-1 mt-1">
                     <Users className="w-3 h-3 text-primary" />
@@ -148,7 +154,13 @@ export const CampusHub = () => {
                 <NeonButton
                   variant="ghost"
                   size="sm"
-                  onClick={() => joinClubMutation.mutate(club.id)}
+                  onClick={() => {
+                    if (club.isPremiumOnly && !user?.isPremium) {
+                      toast.error("This is a premium-only club. Subscribe to premium to join.");
+                      return;
+                    }
+                    joinClubMutation.mutate(club.id);
+                  }}
                   disabled={joinClubMutation.isPending}
                 >
                   Join
@@ -186,7 +198,12 @@ export const CampusHub = () => {
                     />
                   )}
                   <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">{event.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">{event.title}</h3>
+                      {event.isPremiumOnly && (
+                        <Crown className="w-4 h-4 text-neon-gold" title="Premium Only" />
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {event.description || "No description"}
                     </p>
@@ -203,7 +220,13 @@ export const CampusHub = () => {
                   <NeonButton
                     variant="ghost"
                     size="sm"
-                    onClick={() => rsvpMutation.mutate(event.id)}
+                    onClick={() => {
+                      if (event.isPremiumOnly && !user?.isPremium) {
+                        toast.error("This is a premium-only event. Subscribe to premium to RSVP.");
+                        return;
+                      }
+                      rsvpMutation.mutate(event.id);
+                    }}
                     disabled={rsvpMutation.isPending}
                   >
                     RSVP
