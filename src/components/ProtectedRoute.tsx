@@ -1,15 +1,26 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getVerificationStatus } from "@/services/verification";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: ("student" | "college_admin" | "super_admin")[];
+  requireVerification?: boolean;
 }
 
-export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, allowedRoles, requireVerification = false }: ProtectedRouteProps) => {
   const { isAuthenticated, user, loading } = useAuth();
   const [timeoutReached, setTimeoutReached] = useState(false);
+
+  // Check verification status for students
+  const { data: verificationData, isLoading: verificationLoading } = useQuery({
+    queryKey: ["verification-status"],
+    queryFn: getVerificationStatus,
+    enabled: isAuthenticated && user?.role === "student" && requireVerification,
+    retry: false,
+  });
 
   useEffect(() => {
     if (loading) {
@@ -21,7 +32,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
     }
   }, [loading]);
 
-  if (loading) {
+  if (loading || (requireVerification && verificationLoading)) {
     if (timeoutReached) {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -40,6 +51,19 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check verification for students
+  if (user?.role === "student" && requireVerification) {
+    const userStatus = verificationData?.data?.user;
+    const isVerified = 
+      userStatus?.emailVerified && 
+      userStatus?.phoneVerified && 
+      (userStatus?.verifiedStatus === "approved" || userStatus?.bypassVerified);
+    
+    if (!isVerified) {
+      return <Navigate to="/verify" replace />;
+    }
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {

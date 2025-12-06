@@ -58,7 +58,7 @@ const AppRoutes = () => {
         path="/"
         element={
           isAuthenticated ? (
-            <ProtectedRoute allowedRoles={["student"]}>
+            <ProtectedRoute allowedRoles={["student"]} requireVerification={true}>
               <Index />
             </ProtectedRoute>
           ) : (

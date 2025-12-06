@@ -22,6 +22,8 @@ const Login = () => {
     try {
       await login(email, password);
       toast.success("Login successful!");
+      // Check verification status and redirect accordingly
+      // The ProtectedRoute will handle redirecting to /verify if not verified
       navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
