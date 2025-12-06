@@ -292,8 +292,11 @@ export const SuperAdminPanel = () => {
                     </h3>
                     <p className="text-sm text-muted-foreground">{verification.user.email}</p>
                     <p className="text-sm text-muted-foreground">{verification.user.college?.name}</p>
+                    {verification.user.course && (
+                      <p className="text-sm text-muted-foreground">Course: {verification.user.course.name}</p>
+                    )}
                     {verification.matchScore !== undefined && (
-                      <div className="pt-2">
+                      <div className="pt-2 space-y-1">
                         <p className="text-xs text-muted-foreground">Match Score</p>
                         <p className={cn(
                           "text-lg font-bold",
@@ -302,6 +305,42 @@ export const SuperAdminPanel = () => {
                         )}>
                           {verification.matchScore}%
                         </p>
+                        {verification.faceMatchScore !== undefined && (
+                          <p className="text-xs text-muted-foreground">
+                            Face Match: {verification.faceMatchScore}%
+                          </p>
+                        )}
+                        {verification.collegeMatch !== undefined && (
+                          <p className={cn(
+                            "text-xs",
+                            verification.collegeMatch ? "text-primary" : "text-destructive"
+                          )}>
+                            College Match: {verification.collegeMatch ? "Yes" : "No"}
+                          </p>
+                        )}
+                        {verification.courseMatch !== undefined && (
+                          <p className={cn(
+                            "text-xs",
+                            verification.courseMatch ? "text-primary" : "text-destructive"
+                          )}>
+                            Course Match: {verification.courseMatch ? "Yes" : "No"}
+                          </p>
+                        )}
+                        {verification.courseDetected && (
+                          <p className="text-xs text-muted-foreground">
+                            Detected: {verification.courseDetected}
+                          </p>
+                        )}
+                        {verification.idCardText && (
+                          <details className="mt-2">
+                            <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                              View ID Card Text
+                            </summary>
+                            <p className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
+                              {verification.idCardText}
+                            </p>
+                          </details>
+                        )}
                       </div>
                     )}
                   </div>

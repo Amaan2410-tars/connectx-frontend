@@ -56,12 +56,18 @@ export const ProtectedRoute = ({ children, allowedRoles, requireVerification = f
   // Check verification for students
   if (user?.role === "student" && requireVerification) {
     const userStatus = verificationData?.data?.user;
+    const verification = verificationData?.data?.verification;
+    
+    // Allow access if verification is pending (user has submitted verification)
+    // Only redirect if not verified and no pending verification exists
     const isVerified = 
       userStatus?.emailVerified && 
       userStatus?.phoneVerified && 
       (userStatus?.verifiedStatus === "approved" || userStatus?.bypassVerified);
     
-    if (!isVerified) {
+    const hasPendingVerification = verification?.status === "pending";
+    
+    if (!isVerified && !hasPendingVerification) {
       return <Navigate to="/verify" replace />;
     }
   }

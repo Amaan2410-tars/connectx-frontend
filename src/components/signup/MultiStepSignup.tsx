@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, Mail, Phone } from "lucide-react";
 import { getCollegesForSignup } from "@/services/colleges";
+import { getCoursesByCollege } from "@/services/courses";
 import { useQuery } from "@tanstack/react-query";
 import { sendEmailOtp, sendPhoneOtp, verifyEmailOtp, verifyPhoneOtp } from "@/services/otp";
 
@@ -47,6 +48,7 @@ export const MultiStepSignup = () => {
     phone: "",
     batch: "",
     collegeId: "",
+    courseId: "",
   });
   const [emailOtp, setEmailOtp] = useState("");
   const [phoneOtp, setPhoneOtp] = useState("");
@@ -60,7 +62,14 @@ export const MultiStepSignup = () => {
     queryFn: getCollegesForSignup,
   });
 
+  const { data: coursesData, isLoading: coursesLoading } = useQuery({
+    queryKey: ["courses-by-college", formData.collegeId],
+    queryFn: () => getCoursesByCollege(formData.collegeId),
+    enabled: !!formData.collegeId,
+  });
+
   const colleges = collegesData?.data || [];
+  const courses = coursesData?.data || [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -73,6 +82,8 @@ export const MultiStepSignup = () => {
     setFormData({
       ...formData,
       [name]: value,
+      // Reset courseId when college changes
+      ...(name === "collegeId" && { courseId: "" }),
     });
   };
 
@@ -171,8 +182,8 @@ export const MultiStepSignup = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.username || !formData.email || !formData.password || 
-        !formData.phone || !formData.batch || !formData.collegeId) {
-      toast.error("Please fill in all required fields");
+        !formData.phone || !formData.batch || !formData.collegeId || !formData.courseId) {
+      toast.error("Please fill in all required fields including course");
       return;
     }
 
@@ -428,6 +439,45 @@ export const MultiStepSignup = () => {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="courseId">Course *</Label>
+            <Select
+              value={formData.courseId}
+              onValueChange={(value) => handleSelectChange("courseId", value)}
+              required
+              disabled={!formData.collegeId || coursesLoading}
+            >
+              <SelectTrigger>
+                <SelectValue 
+                  placeholder={
+                    !formData.collegeId 
+                      ? "Select college first" 
+                      : coursesLoading 
+                      ? "Loading courses..." 
+                      : "Select your course"
+                  } 
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {!formData.collegeId ? (
+                  <SelectItem value="no-college" disabled>
+                    Please select a college first
+                  </SelectItem>
+                ) : courses.length === 0 ? (
+                  <SelectItem value="no-courses" disabled>
+                    No courses available for this college
+                  </SelectItem>
+                ) : (
+                  courses.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>
+                      {course.name} {course.code && `(${course.code})`}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="batch">Batch *</Label>
             <Select
               value={formData.batch}
@@ -451,7 +501,7 @@ export const MultiStepSignup = () => {
             type="submit"
             variant="gradient"
             className="w-full"
-            disabled={loading || collegesLoading || colleges.length === 0 || sendingOtp}
+            disabled={loading || collegesLoading || colleges.length === 0 || !formData.courseId || sendingOtp}
           >
             {sendingOtp ? (
               <>

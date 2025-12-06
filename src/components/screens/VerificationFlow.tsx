@@ -781,6 +781,17 @@ export const VerificationFlow = () => {
               <p className="text-muted-foreground mt-2">
                 Your verification is being reviewed by admin. You'll be notified once a decision is made.
               </p>
+              <p className="text-sm text-muted-foreground mt-4">
+                You can close this page and check back later. You'll be redirected automatically once approved.
+              </p>
+              <div className="mt-6">
+                <NeonButton
+                  variant="outline"
+                  onClick={() => navigate("/", { replace: true })}
+                >
+                  Go to Home
+                </NeonButton>
+              </div>
             </div>
 
             <GlassCard className="space-y-4" glow="mint">
@@ -813,6 +824,25 @@ export const VerificationFlow = () => {
                     )}>
                       {verification.collegeMatch ? "Yes" : "No"}
                     </span>
+                  </div>
+                )}
+
+                {verification.courseMatch !== undefined && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Course Match</span>
+                    <span className={cn(
+                      "font-semibold",
+                      verification.courseMatch ? "text-primary" : "text-destructive"
+                    )}>
+                      {verification.courseMatch ? "Yes" : "No"}
+                    </span>
+                  </div>
+                )}
+
+                {verification.courseDetected && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Course Detected</span>
+                    <span className="font-semibold text-foreground">{verification.courseDetected}</span>
                   </div>
                 )}
 
