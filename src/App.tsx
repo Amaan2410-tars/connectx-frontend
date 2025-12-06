@@ -17,6 +17,7 @@ import Privacy from "./pages/Privacy";
 import Shipping from "./pages/Shipping";
 import Contact from "./pages/Contact";
 import Refunds from "./pages/Refunds";
+import Home from "./pages/Home";
 
 const queryClient = new QueryClient();
 
@@ -46,13 +47,23 @@ const AppRoutes = () => {
       <Route path="/contact" element={<Contact />} />
       <Route path="/refunds" element={<Refunds />} />
       
+      {/* Public home/landing page */}
+      <Route 
+        path="/home" 
+        element={isAuthenticated ? <Navigate to="/" replace /> : <Home />} 
+      />
+      
       {/* Protected routes - Student */}
       <Route
         path="/"
         element={
-          <ProtectedRoute allowedRoles={["student"]}>
-            <Index />
-          </ProtectedRoute>
+          isAuthenticated ? (
+            <ProtectedRoute allowedRoles={["student"]}>
+              <Index />
+            </ProtectedRoute>
+          ) : (
+            <Navigate to="/home" replace />
+          )
         }
       />
       <Route
