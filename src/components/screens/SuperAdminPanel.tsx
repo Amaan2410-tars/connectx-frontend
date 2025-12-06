@@ -101,6 +101,7 @@ export const SuperAdminPanel = () => {
     onSuccess: () => {
       toast.success("Verification bypassed");
       queryClient.invalidateQueries({ queryKey: ["all-pending-verifications"] });
+      queryClient.invalidateQueries({ queryKey: ["all-users"] });
     },
   });
 
@@ -528,9 +529,43 @@ export const SuperAdminPanel = () => {
                           <span>{user._count?.eventsRSVP || 0} events</span>
                           <span>{user._count?.clubs || 0} clubs</span>
                         </div>
+                        {user.role === "student" && (
+                          <div className="mt-2">
+                            <span className={cn(
+                              "text-xs px-2 py-1 rounded-full",
+                              user.bypassVerified ? "bg-neon-gold/20 text-neon-gold" :
+                              user.verifiedStatus === "approved" ? "bg-primary/20 text-primary" :
+                              user.verifiedStatus === "pending" ? "bg-yellow-500/20 text-yellow-500" :
+                              user.verifiedStatus === "rejected" ? "bg-destructive/20 text-destructive" :
+                              "bg-muted text-muted-foreground"
+                            )}>
+                              {user.bypassVerified ? "Bypassed" :
+                               user.verifiedStatus === "approved" ? "Verified" :
+                               user.verifiedStatus === "pending" ? "Pending" :
+                               user.verifiedStatus === "rejected" ? "Rejected" :
+                               "Not Verified"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      {user.role === "student" && !user.bypassVerified && (
+                        <NeonButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm(`Bypass verification for ${user.name}? This will allow them to access the platform without verification.`)) {
+                              bypassMutation.mutate(user.id);
+                            }
+                          }}
+                          disabled={bypassMutation.isPending}
+                          className="text-neon-gold"
+                          title="Bypass Verification"
+                        >
+                          <Zap className="w-4 h-4" />
+                        </NeonButton>
+                      )}
                       <NeonButton
                         variant="ghost"
                         size="sm"
@@ -541,6 +576,7 @@ export const SuperAdminPanel = () => {
                         }}
                         disabled={deleteUserMutation.isPending}
                         className="text-destructive"
+                        title="Delete User"
                       >
                         <Trash2 className="w-4 h-4" />
                       </NeonButton>
