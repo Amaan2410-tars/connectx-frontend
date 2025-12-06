@@ -22,8 +22,13 @@ export const VerificationFlow = () => {
   const [idCardPreview, setIdCardPreview] = useState<string | null>(null);
   const [faceImagePreview, setFaceImagePreview] = useState<string | null>(null);
   const [idCardUploaded, setIdCardUploaded] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraType, setCameraType] = useState<"idCard" | "face" | null>(null);
   const idCardInputRef = useRef<HTMLInputElement>(null);
   const faceImageInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -104,6 +109,66 @@ export const VerificationFlow = () => {
   const handleIdCardUpload = () => {
     if (idCardFile) {
       idCardMutation.mutate(idCardFile);
+    } else if (idCardPreview) {
+      // If we have a preview but no file (from camera), convert canvas to file
+      toast.error("Please select an image file");
+    }
+  };
+
+  // Camera functionality
+  const startCamera = async (type: "idCard" | "face") => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: type === "face" ? "user" : "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      });
+      setCameraStream(stream);
+      setCameraType(type);
+      setIsCameraOpen(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      toast.error("Unable to access camera. Please check permissions or use file upload instead.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setIsCameraOpen(false);
+    setCameraType(null);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], `photo-${Date.now()}.jpg`, { type: "image/jpeg" });
+            if (cameraType === "idCard") {
+              setIdCardFile(file);
+              setIdCardPreview(canvas.toDataURL("image/jpeg"));
+            } else {
+              setFaceImageFile(file);
+              setFaceImagePreview(canvas.toDataURL("image/jpeg"));
+            }
+            stopCamera();
+          }
+        }, "image/jpeg", 0.9);
+      }
     }
   };
 
@@ -124,6 +189,15 @@ export const VerificationFlow = () => {
       faceImageMutation.mutate(faceImageFile);
     }
   };
+
+  // Cleanup camera stream on unmount
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraStream]);
 
   // Check if user has already uploaded images
   useEffect(() => {
@@ -530,7 +604,7 @@ export const VerificationFlow = () => {
                 <NeonButton
                   variant="ghost"
                   className="flex-1 glass-card"
-                  onClick={() => idCardInputRef.current?.click()}
+                  onClick={() => startCamera("idCard")}
                 >
                   <Camera className="w-5 h-5 mr-2" />
                   Camera
@@ -611,7 +685,7 @@ export const VerificationFlow = () => {
                 <NeonButton
                   variant="ghost"
                   className="flex-1 glass-card"
-                  onClick={() => faceImageInputRef.current?.click()}
+                  onClick={() => startCamera("face")}
                 >
                   <Camera className="w-5 h-5 mr-2" />
                   Camera
@@ -644,6 +718,54 @@ export const VerificationFlow = () => {
                 )}
               </NeonButton>
             )}
+          </div>
+        )}
+
+        {/* Camera Modal */}
+        {isCameraOpen && (
+          <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
+            <GlassCard className="w-full max-w-md space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold">
+                  {cameraType === "idCard" ? "Capture ID Card" : "Capture Face"}
+                </h3>
+                <button
+                  onClick={stopCamera}
+                  className="p-2 rounded-full hover:bg-muted"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="relative">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full rounded-lg"
+                  style={{ transform: cameraType === "face" ? "scaleX(-1)" : "none" }}
+                />
+                <canvas ref={canvasRef} className="hidden" />
+              </div>
+              
+              <div className="flex gap-4">
+                <NeonButton
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={stopCamera}
+                >
+                  Cancel
+                </NeonButton>
+                <NeonButton
+                  variant="gradient"
+                  className="flex-1"
+                  onClick={capturePhoto}
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Capture
+                </NeonButton>
+              </div>
+            </GlassCard>
           </div>
         )}
 
