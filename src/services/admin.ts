@@ -93,3 +93,32 @@ export const deleteUser = async (userId: string) => {
   return response.data;
 };
 
+// GET /admin/verifications/pending (All colleges)
+export const getAllPendingVerifications = async (): Promise<{ success: boolean; data: any[] }> => {
+  const response = await api.get("/admin/verifications/pending");
+  return response.data;
+};
+
+// PUT /admin/verifications/:id (Approve/Reject)
+export const approveVerification = async (verificationId: string) => {
+  const response = await api.put(`/admin/verifications/${verificationId}`, {
+    status: "approved",
+  });
+  return response.data;
+};
+
+export const rejectVerification = async (verificationId: string) => {
+  const response = await api.put(`/admin/verifications/${verificationId}`, {
+    status: "rejected",
+  });
+  return response.data;
+};
+
+// POST /admin/verification/bypass
+export const bypassVerification = async (userId: string) => {
+  const response = await api.post("/admin/verification/bypass", {
+    userId,
+  });
+  return response.data;
+};
+

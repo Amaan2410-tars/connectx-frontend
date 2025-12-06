@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import CollegeAdmin from "./pages/CollegeAdmin";
+import SuperAdmin from "./pages/SuperAdmin";
 
 const queryClient = new QueryClient();
 
@@ -43,20 +45,28 @@ const AppRoutes = () => {
       
       {/* Protected routes - College Admin */}
       <Route
-        path="/college/*"
+        path="/college"
         element={
           <ProtectedRoute allowedRoles={["college_admin"]}>
-            <div>College Admin Dashboard (Coming Soon)</div>
+            <CollegeAdmin />
           </ProtectedRoute>
         }
       />
       
       {/* Protected routes - Super Admin */}
       <Route
-        path="/admin/*"
+        path="/admin"
         element={
           <ProtectedRoute allowedRoles={["super_admin"]}>
-            <div>Super Admin Dashboard (Coming Soon)</div>
+            <SuperAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SuperAdmin />
           </ProtectedRoute>
         }
       />

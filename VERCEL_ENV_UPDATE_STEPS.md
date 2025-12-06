@@ -131,3 +131,4 @@ console.log(import.meta.env.VITE_API_URL);
 
 **Once you update the environment variable and redeploy, the frontend will connect to the new backend!** 🚀
 
+

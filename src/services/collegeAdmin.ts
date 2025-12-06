@@ -23,12 +23,20 @@ export interface PendingVerification {
   idCardImage: string;
   faceImage: string;
   status: "pending";
+  matchScore?: number;
+  faceMatchScore?: number;
+  collegeMatch?: boolean;
+  analysisRemarks?: string;
   createdAt: string;
   user: {
     id: string;
     name: string;
     email: string;
+    phone?: string;
     batch?: string;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
+    bypassVerified?: boolean;
     college?: {
       name: string;
     };
@@ -83,6 +91,14 @@ export const approveVerification = async (verificationId: string) => {
 export const rejectVerification = async (verificationId: string) => {
   const response = await api.put(`/college/verifications/${verificationId}`, {
     status: "rejected",
+  });
+  return response.data;
+};
+
+// POST /college/verification/bypass
+export const bypassVerification = async (userId: string) => {
+  const response = await api.post("/college/verification/bypass", {
+    userId,
   });
   return response.data;
 };

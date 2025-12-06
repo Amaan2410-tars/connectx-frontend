@@ -22,9 +22,9 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
     if (user.role === "student") {
       return <Navigate to="/" replace />;
     } else if (user.role === "college_admin") {
-      return <Navigate to="/college/dashboard" replace />;
+      return <Navigate to="/college" replace />;
     } else if (user.role === "super_admin") {
-      return <Navigate to="/admin/dashboard" replace />;
+      return <Navigate to="/admin" replace />;
     }
   }
 

@@ -2,11 +2,12 @@ import { api } from "@/lib/apiClient";
 
 export interface SignupData {
   name: string;
+  username: string;
   email: string;
   password: string;
-  phone?: string;
-  collegeId?: string;
-  batch?: string;
+  phone: string;
+  collegeId: string;
+  batch: string;
   role?: "super_admin" | "college_admin" | "student";
 }
 
@@ -28,10 +29,11 @@ export interface AuthResponse {
 export interface User {
   id: string;
   name: string;
+  username: string;
   email: string;
   role: "super_admin" | "college_admin" | "student";
-  collegeId?: string;
-  batch?: string;
+  collegeId: string;
+  batch: string;
   avatar?: string;
   banner?: string;
   verifiedStatus: "pending" | "approved" | "rejected";

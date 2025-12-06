@@ -12,15 +12,32 @@ export interface VerificationStatus {
   faceImage: string;
   status: "pending" | "approved" | "rejected";
   reviewedBy?: string;
+  matchScore?: number;
+  faceMatchScore?: number;
+  collegeMatch?: boolean;
+  analysisRemarks?: string;
   createdAt: string;
 }
 
-// POST /verify/id-upload
+export interface VerificationStatusResponse {
+  user: {
+    id: string;
+    emailVerified: boolean;
+    phoneVerified: boolean;
+    verifiedStatus: "pending" | "approved" | "rejected";
+    bypassVerified: boolean;
+  };
+  verification: VerificationStatus | null;
+  canRetry?: boolean;
+  retryAfter?: string | null;
+}
+
+// POST /student/verify/id-upload
 export const uploadIdCard = async (file: File) => {
   const formData = new FormData();
   formData.append("idCard", file);
   
-  const response = await api.post("/upload/verification/id", formData, {
+  const response = await api.post("/student/verify/id-upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -28,12 +45,12 @@ export const uploadIdCard = async (file: File) => {
   return response.data;
 };
 
-// POST /verify/face-upload
+// POST /student/verify/face-upload
 export const uploadFaceImage = async (file: File) => {
   const formData = new FormData();
   formData.append("faceImage", file);
   
-  const response = await api.post("/upload/verification/face", formData, {
+  const response = await api.post("/student/verify/face-upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -65,9 +82,9 @@ export const submitVerification = async (data: VerificationData) => {
   return response.data;
 };
 
-// GET /verify/status
-export const getVerificationStatus = async (): Promise<{ success: boolean; data: VerificationStatus | null }> => {
-  const response = await api.get("/student/verification/status");
+// GET /student/verify/status
+export const getVerificationStatus = async (): Promise<{ success: boolean; data: VerificationStatusResponse }> => {
+  const response = await api.get("/student/verify/status");
   return response.data;
 };
 
