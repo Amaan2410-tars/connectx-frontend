@@ -46,11 +46,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = async (email: string, password: string) => {
-    const response = await loginApi({ email, password });
-    localStorage.setItem("accessToken", response.data.accessToken);
-    localStorage.setItem("refreshToken", response.data.refreshToken);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    setUser(response.data.user);
+    try {
+      const response = await loginApi({ email, password });
+      if (!response || !response.data) {
+        throw new Error("Invalid response from server");
+      }
+      localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      setUser(response.data.user);
+    } catch (error: any) {
+      console.error("Login error in AuthContext:", error);
+      // Re-throw with a clearer message
+      const errorMessage = 
+        error.response?.data?.error || 
+        error.response?.data?.message ||
+        error.message || 
+        "Login failed. Please check your credentials.";
+      throw new Error(errorMessage);
+    }
   };
 
   const signup = async (data: any) => {

@@ -38,13 +38,27 @@ api.interceptors.response.use(
   },
   (error) => {
     // Log error for debugging
+    const errorData = error.response?.data;
     console.error("API Error:", {
       url: error.config?.url,
       method: error.config?.method,
       status: error.response?.status,
-      data: error.response?.data,
+      data: errorData,
       message: error.message,
+      fullError: error,
     });
+    
+    // Ensure error response has a proper message
+    if (errorData && !errorData.error && !errorData.message) {
+      if (typeof errorData === "string") {
+        error.response.data = { error: errorData };
+      } else if (typeof errorData === "object") {
+        error.response.data = { 
+          ...errorData, 
+          error: errorData.error || errorData.message || "An error occurred" 
+        };
+      }
+    }
 
     // Handle network errors
     if (!error.response) {
