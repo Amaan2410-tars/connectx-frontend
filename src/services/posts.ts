@@ -51,12 +51,44 @@ export const createPost = async (data: CreatePostData) => {
 
 // GET /posts/feed
 export const getFeed = async (limit: number = 20, cursor?: string): Promise<FeedResponse> => {
-  const params = new URLSearchParams();
-  params.append("limit", limit.toString());
-  if (cursor) params.append("cursor", cursor);
-  
-  const response = await api.get(`/student/posts/feed?${params.toString()}`);
-  return response.data;
+  try {
+    const params = new URLSearchParams();
+    params.append("limit", limit.toString());
+    if (cursor) params.append("cursor", cursor);
+    
+    const response = await api.get(`/student/posts/feed?${params.toString()}`);
+    
+    // Validate response structure
+    if (!response.data || !response.data.data) {
+      return {
+        success: false,
+        data: {
+          posts: [],
+          nextCursor: undefined,
+          hasMore: false,
+        },
+      };
+    }
+    
+    return {
+      success: response.data.success !== false,
+      data: {
+        posts: Array.isArray(response.data.data.posts) ? response.data.data.posts : [],
+        nextCursor: response.data.data.nextCursor,
+        hasMore: response.data.data.hasMore || false,
+      },
+    };
+  } catch (error: any) {
+    console.error("Error fetching feed:", error);
+    return {
+      success: false,
+      data: {
+        posts: [],
+        nextCursor: undefined,
+        hasMore: false,
+      },
+    };
+  }
 };
 
 // POST /posts/like

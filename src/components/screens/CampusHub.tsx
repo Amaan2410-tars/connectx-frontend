@@ -45,15 +45,16 @@ export const CampusHub = () => {
     },
   });
 
-  const clubs = clubsData?.data || [];
-  const events = eventsData?.data || [];
+  // Safe array extraction with null checks
+  const clubs = Array.isArray(clubsData?.data) ? clubsData.data : [];
+  const events = Array.isArray(eventsData?.data) ? eventsData.data : [];
 
   const departments = [
     "Engineering", "Business", "Arts", "Sciences", "Medicine", "Law"
   ];
 
   return (
-    <div className="px-4 pt-4 pb-32 space-y-6 animate-fade-in">
+    <div className="px-4 lg:px-0 pt-4 lg:pt-6 pb-32 lg:pb-6 space-y-6 animate-fade-in max-w-6xl lg:mx-auto">
       {/* Campus Banner */}
       <GlassCard className="relative overflow-hidden p-0 h-48">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20" />

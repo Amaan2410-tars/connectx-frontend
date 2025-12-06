@@ -19,8 +19,19 @@ export interface Event {
 
 // GET /events
 export const getEvents = async (): Promise<{ success: boolean; data: Event[] }> => {
-  const response = await api.get("/student/events");
-  return response.data;
+  try {
+    const response = await api.get("/student/events");
+    return {
+      success: response.data?.success !== false,
+      data: Array.isArray(response.data?.data) ? response.data.data : [],
+    };
+  } catch (error: any) {
+    console.error("Error fetching events:", error);
+    return {
+      success: false,
+      data: [],
+    };
+  }
 };
 
 // GET /events/:id

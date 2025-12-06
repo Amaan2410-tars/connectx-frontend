@@ -18,8 +18,19 @@ export interface Club {
 
 // GET /clubs
 export const getClubs = async (): Promise<{ success: boolean; data: Club[] }> => {
-  const response = await api.get("/student/clubs");
-  return response.data;
+  try {
+    const response = await api.get("/student/clubs");
+    return {
+      success: response.data?.success !== false,
+      data: Array.isArray(response.data?.data) ? response.data.data : [],
+    };
+  } catch (error: any) {
+    console.error("Error fetching clubs:", error);
+    return {
+      success: false,
+      data: [],
+    };
+  }
 };
 
 // GET /clubs/:id

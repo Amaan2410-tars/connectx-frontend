@@ -52,7 +52,18 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
 
 // GET /auth/me
 export const getMe = async (): Promise<{ success: boolean; data: User }> => {
-  const response = await api.get("/auth/me");
-  return response.data;
+  try {
+    const response = await api.get("/auth/me");
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response structure");
+    }
+    return {
+      success: response.data.success !== false,
+      data: response.data.data,
+    };
+  } catch (error: any) {
+    console.error("Error fetching user:", error);
+    throw error; // Re-throw to let AuthContext handle it
+  }
 };
 

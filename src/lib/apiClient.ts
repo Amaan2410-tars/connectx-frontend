@@ -1,15 +1,20 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+// Use production backend URL - ensure no trailing slash
+const baseURL = import.meta.env.VITE_API_URL || "https://connectx-backend-p1n4.onrender.com/api";
 
-// Debug: Log the base URL (remove after debugging)
-console.log("🔍 API Base URL:", baseURL);
+// Remove trailing slash if present
+const cleanBaseURL = baseURL.replace(/\/+$/, "");
+
+// Debug: Log the base URL
+console.log("🔍 API Base URL:", cleanBaseURL);
 
 const api = axios.create({
-  baseURL,
+  baseURL: cleanBaseURL,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 30000, // 30 second timeout
 });
 
 // Request interceptor to attach JWT token

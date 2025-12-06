@@ -33,7 +33,8 @@ export const CouponsMarketplace = () => {
     },
   });
 
-  const coupons = couponsData?.data || [];
+  // Safe array extraction with null checks
+  const coupons = Array.isArray(couponsData?.data) ? couponsData.data : [];
 
   if (isLoading) {
     return (
@@ -46,7 +47,7 @@ export const CouponsMarketplace = () => {
   }
 
   return (
-    <div className="px-4 pt-4 pb-32 space-y-6 animate-fade-in">
+    <div className="px-4 lg:px-0 pt-4 lg:pt-6 pb-32 lg:pb-6 space-y-6 animate-fade-in max-w-6xl lg:mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -83,8 +84,9 @@ export const CouponsMarketplace = () => {
             <p className="text-muted-foreground">No coupons available yet</p>
           </GlassCard>
         ) : (
-          coupons
+          (Array.isArray(coupons) ? coupons : [])
             .filter((coupon: any) => {
+              if (!coupon) return false;
               if (activeCategory === "All") return true;
               // You can add category filtering logic here
               return true;

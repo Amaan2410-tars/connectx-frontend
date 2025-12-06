@@ -56,7 +56,7 @@ const upcomingEvents = [
 
 export const DiscoverPage = () => {
   return (
-    <div className="px-4 pt-4 pb-32 space-y-6 animate-fade-in">
+    <div className="px-4 lg:px-0 pt-4 lg:pt-6 pb-32 lg:pb-6 space-y-6 animate-fade-in max-w-6xl lg:mx-auto">
       {/* Header */}
       <div className="mb-2">
         <h1 className="text-2xl font-bold text-foreground">Discover</h1>

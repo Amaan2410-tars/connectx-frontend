@@ -77,7 +77,7 @@ export const ProfilePage = () => {
   }
 
   return (
-    <div className="pb-32 animate-fade-in">
+    <div className="pb-32 lg:pb-6 animate-fade-in max-w-4xl lg:mx-auto">
       {/* Banner */}
       <div className="relative h-40 gradient-primary animate-gradient">
         {profile?.banner && (
