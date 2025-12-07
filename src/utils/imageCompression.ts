@@ -125,3 +125,4 @@ export const shouldCompress = (file: File, maxSizeMB: number = 2): boolean => {
   return sizeMB > maxSizeMB;
 };
 
+

@@ -26,3 +26,4 @@ export const getAnnouncements = async (): Promise<{ success: boolean; data: Anno
   }
 };
 
+

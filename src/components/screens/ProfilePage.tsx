@@ -1,4 +1,4 @@
-import { Settings, Edit2, Grid, Bookmark, Heart, MapPin } from "lucide-react";
+import { Settings, Edit2, Grid, Bookmark, Heart, MapPin, LogOut } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 import { Avatar } from "../ui/Avatar";
 import { VerifiedBadge } from "../ui/VerifiedBadge";
@@ -17,6 +17,14 @@ import { updateProfile } from "@/services/user";
 import { createPost } from "@/services/posts";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const tabs = [
   { id: "posts", icon: Grid, label: "Posts" },
@@ -28,8 +36,9 @@ export const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [postDialogOpen, setPostDialogOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: profileData, isLoading } = useQuery({
     queryKey: ["profile"],
@@ -88,9 +97,26 @@ export const ProfilePage = () => {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <button className="absolute top-4 right-4 p-2 glass-card">
-          <Settings className="w-5 h-5 text-white" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="absolute top-4 right-4 p-2 glass-card hover:bg-background/80 transition-colors">
+              <Settings className="w-5 h-5 text-white" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 glass-card border-border/50">
+            <DropdownMenuItem
+              onClick={() => {
+                logout();
+                navigate("/login");
+                toast.success("Logged out successfully");
+              }}
+              className="cursor-pointer text-red-400 focus:text-red-300 focus:bg-red-500/10"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Profile Info */}

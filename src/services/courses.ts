@@ -23,3 +23,4 @@ export const getCoursesByCollege = async (collegeId: string): Promise<{ success:
   }
 };
 
+

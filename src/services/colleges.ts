@@ -23,3 +23,4 @@ export const getCollegesForSignup = async (): Promise<{ success: boolean; data: 
   }
 };
 
+

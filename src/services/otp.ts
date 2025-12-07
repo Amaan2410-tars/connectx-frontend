@@ -24,3 +24,4 @@ export const verifyPhoneOtp = async (phone: string, otp: string) => {
   return response.data;
 };
 
+

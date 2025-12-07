@@ -41,3 +41,4 @@ export const getCancellationAndRefunds = async (): Promise<LegalPageResponse> =>
   return response.data;
 };
 
+
